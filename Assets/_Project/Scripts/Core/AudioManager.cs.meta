@@ -1,0 +1,20 @@
+fileFormatVersion: 2
+guid: d08075554b66070499bdd42f9fb32392
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - ambientLoop: {fileID: 8300000, guid: c864ea5fae1f7704d8c5db359867fe21, type: 3}
+  - whisper: {fileID: 8300000, guid: d540f21148ca9ac4bab2679dc365bbee, type: 3}
+  - knock: {fileID: 8300000, guid: 8c69349388a36c640b4b48b654089653, type: 3}
+  - phoneGlitch: {fileID: 8300000, guid: 27ee25ec393f52c46bc8ce37ce3674ca, type: 3}
+  - scareStinger: {fileID: 8300000, guid: 6a03111f1b87ce24c9f96393bc1436d4, type: 3}
+  - heartbeat: {fileID: 8300000, guid: ace51d0dbd9ab444f876da665cea9e9a, type: 3}
+  - ambientSource: {instanceID: 0}
+  - oneShotSource: {instanceID: 0}
+  - heartbeatSource: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
