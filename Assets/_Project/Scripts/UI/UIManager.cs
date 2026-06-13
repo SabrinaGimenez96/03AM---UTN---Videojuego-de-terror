@@ -52,6 +52,10 @@ namespace HorrorPrototype.UI
         public GameObject endPanel;
         public Text endTitleText;
         public Text endReasonText;
+        [Header("End Screen Images (Optional)")]
+        public Image endBackgroundImage;
+        public Sprite victorySprite;
+        public Sprite defeatSprite;
 
         private void Awake()
         {
@@ -140,20 +144,20 @@ namespace HorrorPrototype.UI
                 endPanel.SetActive(true);
             }
 
-            if (endTitleText != null)
+            switch (result)
             {
-                switch (result)
-                {
-                    case EndResult.Victoria:
-                        endTitleText.text = "VICTORIA";
-                        break;
-                    case EndResult.Neutral:
-                        endTitleText.text = "FINAL NEUTRAL";
-                        break;
-                    default:
-                        endTitleText.text = "DERROTA";
-                        break;
-                }
+                case EndResult.Victoria:
+                    if (endTitleText != null) endTitleText.text = "VICTORIA";
+                    if (endBackgroundImage != null && victorySprite != null) endBackgroundImage.sprite = victorySprite;
+                    break;
+                case EndResult.Neutral:
+                    if (endTitleText != null) endTitleText.text = "FINAL NEUTRAL";
+                    if (endBackgroundImage != null && victorySprite != null) endBackgroundImage.sprite = victorySprite;
+                    break;
+                default:
+                    if (endTitleText != null) endTitleText.text = "DERROTA";
+                    if (endBackgroundImage != null && defeatSprite != null) endBackgroundImage.sprite = defeatSprite;
+                    break;
             }
 
             if (endReasonText != null)
@@ -199,6 +203,19 @@ namespace HorrorPrototype.UI
         {
             // Fallback para botones que aplican una accion directa sin objeto apuntado.
             GameManager.Instance?.ApplyAction(action);
+        }
+
+        public void RestartGame()
+        {
+            Time.timeScale = 1f;
+            UnityEngine.SceneManagement.SceneManager.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
+        }
+
+        public void LoadMainMenu()
+        {
+            Time.timeScale = 1f;
+            // Asegúrate de que la escena del menú se llame "Menu" o cambia este texto.
+            UnityEngine.SceneManagement.SceneManager.LoadScene("Menu"); 
         }
 
         private ActionType currentContextAction;
