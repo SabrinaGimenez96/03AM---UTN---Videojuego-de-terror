@@ -14,6 +14,7 @@ namespace HorrorPrototype.Core
         private const int EndMinutes = 6 * 60;
         private float elapsedSeconds;
         private bool nightResolved;
+        private int lastDisplayedMinute = -1;
 
         private void Start()
         {
@@ -31,7 +32,12 @@ namespace HorrorPrototype.Core
             elapsedSeconds += Time.deltaTime;
             float progress = Mathf.Clamp01(elapsedSeconds / nightDurationSeconds);
             int currentMinutes = Mathf.RoundToInt(Mathf.Lerp(StartMinutes, EndMinutes, progress));
-            UIManager.Instance?.ShowTime(FormatClock(currentMinutes));
+            
+            if (currentMinutes != lastDisplayedMinute)
+            {
+                lastDisplayedMinute = currentMinutes;
+                UIManager.Instance?.ShowTime(FormatClock(currentMinutes));
+            }
 
             // A las 05:45 AM comienza la secuencia de escape
             if (currentMinutes >= 345 && !GameManager.Instance.isFinalEventActive)
