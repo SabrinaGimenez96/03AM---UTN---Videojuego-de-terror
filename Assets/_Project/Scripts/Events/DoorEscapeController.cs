@@ -49,6 +49,8 @@ namespace HorrorPrototype.Events
         public Renderer hallwayFogRenderer;
         public Color safeLightColor = new Color(1f, 0.86f, 0.48f);
         public Color dangerLightColor = new Color(0.32f, 0.02f, 0.02f);
+        public Light[] hallwayLightsToFlicker;
+        public AudioSource hallwayDeathAudio;
         public GameObject shadowFigurePrefab;
         public Transform hallwayVisualPoint;
 
@@ -57,6 +59,7 @@ namespace HorrorPrototype.Events
         private bool hasClosedPose;
         private GameObject activeReveal;
         private Coroutine closeRoutine;
+        private Coroutine flickerRoutine;
         private float closeAtRealtime = -1f;
 
         public bool IsOpen { get; private set; }
@@ -88,11 +91,38 @@ namespace HorrorPrototype.Events
             {
                 case DoorEscapeOutcome.DarkHallway:
                     SpawnShadowReveal(2.6f);
+                    if (flickerRoutine != null) StopCoroutine(flickerRoutine);
+                    flickerRoutine = StartCoroutine(FlickerHallwayLights(1.5f));
                     break;
                 case DoorEscapeOutcome.Crisis:
                     SpawnShadowReveal(4f);
+                    if (flickerRoutine != null) StopCoroutine(flickerRoutine);
+                    flickerRoutine = StartCoroutine(FlickerHallwayLights(2.5f));
                     break;
             }
+        }
+
+        public void ShowDeathSequence()
+        {
+            CaptureClosedPose();
+            StopCloseRoutine();
+            CancelInvoke(nameof(CloseDoor));
+            closeAtRealtime = -1f;
+            OpenDoor();
+            HideHallwayReveal();
+
+            // Mute all other audio sources in the scene
+            AudioSource[] allAudioSources = FindObjectsByType<AudioSource>(FindObjectsInactive.Exclude);
+            foreach (var audioSrc in allAudioSources)
+            {
+                if (audioSrc != hallwayDeathAudio && audioSrc.gameObject.scene.IsValid())
+                {
+                    audioSrc.volume = 0f;
+                }
+            }
+
+            if (flickerRoutine != null) StopCoroutine(flickerRoutine);
+            flickerRoutine = StartCoroutine(FadeOutHallwayLights(3f));
         }
 
         public void HideHallwayReveal()
@@ -110,6 +140,14 @@ namespace HorrorPrototype.Events
 
             SetHallwayFog(false, Color.clear);
             ClearActiveReveal();
+            
+            if (hallwayLightsToFlicker != null)
+            {
+                foreach (var light in hallwayLightsToFlicker)
+                {
+                    if (light != null) light.enabled = false;
+                }
+            }
         }
 
         public void CloseDoor()
@@ -224,6 +262,118 @@ namespace HorrorPrototype.Events
 
             StopCoroutine(closeRoutine);
             closeRoutine = null;
+        }
+
+        private IEnumerator FlickerHallwayLights(float duration)
+        {
+            if (hallwayLightsToFlicker == null || hallwayLightsToFlicker.Length == 0) yield break;
+            
+            float endTime = Time.realtimeSinceStartup + duration;
+            while (Time.realtimeSinceStartup < endTime)
+            {
+                foreach (var light in hallwayLightsToFlicker)
+                {
+                    if (light != null) light.enabled = Random.value > 0.5f;
+                }
+                yield return new WaitForSecondsRealtime(Random.Range(0.05f, 0.15f));
+            }
+            
+            // Al terminar el parpadeo, apagamos todo para el terror final
+            foreach (var light in hallwayLightsToFlicker)
+            {
+                if (light != null) light.enabled = false;
+            }
+            flickerRoutine = null;
+        }
+
+        private IEnumerator FadeOutHallwayLights(float fadeDuration)
+        {
+            if (hallwayLightsToFlicker == null || hallwayLightsToFlicker.Length == 0) yield break;
+
+            float[] startIntensities = new float[hallwayLightsToFlicker.Length];
+            for (int i = 0; i < hallwayLightsToFlicker.Length; i++)
+            {
+                if (hallwayLightsToFlicker[i] != null)
+                {
+                    hallwayLightsToFlicker[i].gameObject.SetActive(true);
+                    hallwayLightsToFlicker[i].enabled = true;
+                    if (hallwayLightsToFlicker[i].intensity == 0f) hallwayLightsToFlicker[i].intensity = 5f;
+                    startIntensities[i] = hallwayLightsToFlicker[i].intensity;
+                }
+            }
+
+            yield return new WaitForSecondsRealtime(2f);
+
+            HorrorPrototype.Player.FirstPersonController fpc = FindAnyObjectByType<HorrorPrototype.Player.FirstPersonController>();
+            if (fpc != null) fpc.DisableLookAndMovement();
+
+            float timer = 0f;
+            float nextDrainTime = 0.5f;
+
+            while (timer < fadeDuration)
+            {
+                timer += Time.unscaledDeltaTime;
+                
+                if (timer >= nextDrainTime)
+                {
+                    nextDrainTime += 0.5f;
+                    Core.GameManager.Instance.DrainStatsForCinematic();
+                }
+
+                float t = 1f - (timer / fadeDuration);
+                for (int i = 0; i < hallwayLightsToFlicker.Length; i++)
+                {
+                    if (hallwayLightsToFlicker[i] != null) hallwayLightsToFlicker[i].intensity = startIntensities[i] * t;
+                }
+                yield return null;
+            }
+
+            for (int i = 0; i < hallwayLightsToFlicker.Length; i++)
+            {
+                if (hallwayLightsToFlicker[i] != null) hallwayLightsToFlicker[i].enabled = false;
+            }
+
+            if (hallwayDeathAudio != null)
+            {
+                hallwayDeathAudio.spatialBlend = 0f; // Forzar a 2D para que el paneo estéreo funcione en toda la cabeza
+                hallwayDeathAudio.panStereo = 1f;    // Arrancar a la derecha
+                hallwayDeathAudio.Play();
+                
+                float sequenceLength = 30f;
+                float audioTimer = 0f;
+                nextDrainTime = 0.5f;
+                
+                while (audioTimer < sequenceLength)
+                {
+                    audioTimer += Time.unscaledDeltaTime;
+                    
+                    // Logica del Paneo 3D Psicologico:
+                    if (audioTimer < 10f) 
+                        hallwayDeathAudio.panStereo = 1f; // Derecha (segundos 0 a 10)
+                    else if (audioTimer < 12f) 
+                        hallwayDeathAudio.panStereo = Mathf.Lerp(1f, -1f, (audioTimer - 10f) / 2f); // Transición rápida
+                    else if (audioTimer < 20f) 
+                        hallwayDeathAudio.panStereo = -1f; // Izquierda (segundos 12 a 20)
+                    else if (audioTimer < 22f) 
+                        hallwayDeathAudio.panStereo = Mathf.Lerp(-1f, 0f, (audioTimer - 20f) / 2f); // Transición al centro
+                    else 
+                        hallwayDeathAudio.panStereo = 0f; // Ambos (segundos 22 a 30)
+
+                    if (audioTimer >= nextDrainTime)
+                    {
+                        nextDrainTime += 0.5f;
+                        Core.GameManager.Instance.DrainStatsForCinematic();
+                    }
+                    yield return null;
+                }
+            }
+            else
+            {
+                yield return new WaitForSeconds(30f);
+            }
+
+            Core.GameManager.Instance.EndHallwayDeathSequence();
+            flickerRoutine = null;
         }
     }
 }

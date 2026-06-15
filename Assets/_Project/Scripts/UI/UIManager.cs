@@ -101,7 +101,7 @@ namespace HorrorPrototype.UI
 
             if (contextActionPanel != null)
             {
-                contextActionPanel.SetActive(true);
+                contextActionPanel.SetActive(false); // Oculto permanentemente a favor del texto central
             }
 
             if (contextActionText != null)

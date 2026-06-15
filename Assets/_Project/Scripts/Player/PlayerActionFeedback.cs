@@ -2,6 +2,7 @@ using HorrorPrototype.Core;
 using HorrorPrototype.Interaction;
 using System.Collections;
 using UnityEngine;
+using HorrorPrototype.UI;
 
 namespace HorrorPrototype.Player
 {
@@ -38,15 +39,24 @@ namespace HorrorPrototype.Player
         private bool phoneIsHeld;
         private bool lampIsOn;
         private bool isInBed;
+        private bool tvIsOn;
 
         public bool PhoneIsHeld => phoneIsHeld;
         public bool IsInBed => isInBed;
         public bool LampIsOn => lampIsOn;
+        public bool TvIsOn => tvIsOn;
 
         private void Awake()
         {
             EnsureReferences();
-            isInBed = startsInBed;
+            if (startsInBed)
+            {
+                ReturnToBed();
+            }
+            else
+            {
+                StandUpFromBed();
+            }
         }
 
         private void Update()
@@ -88,6 +98,12 @@ namespace HorrorPrototype.Player
                     break;
                 case ActionType.Lamp:
                     ToggleLamp(interactable);
+                    break;
+                case ActionType.TV:
+                    ToggleTV(GetFeedbackTarget(interactable));
+                    break;
+                case ActionType.Mirror:
+                    TriggerMirrorNarrative();
                     break;
                 case ActionType.Door:
                     if (isInBed)
@@ -282,6 +298,49 @@ namespace HorrorPrototype.Player
                 lampFlickerRoutine = null;
                 flickeringLampLight = null;
                 lampFlickerDeadline = -1f;
+            }
+        }
+
+        private void ToggleTV(Transform target)
+        {
+            tvIsOn = !tvIsOn;
+
+            Light tvLight = target.GetComponentInChildren<Light>(true);
+            if (tvLight != null)
+            {
+                tvLight.gameObject.SetActive(true);
+                tvLight.enabled = tvIsOn;
+            }
+
+            AudioSource tvAudio = target.GetComponentInChildren<AudioSource>(true);
+            if (tvAudio != null)
+            {
+                if (tvIsOn) tvAudio.Play();
+                else tvAudio.Stop();
+            }
+
+            if (tvIsOn && GameManager.Instance != null && GameManager.Instance.miedo >= 5)
+            {
+                GameManager.Instance.ApplyParanormalEvent("La estática te perfora los oídos.", 1, -1);
+            }
+        }
+
+        private void TriggerMirrorNarrative()
+        {
+            if (GameManager.Instance == null) return;
+
+            if (GameManager.Instance.miedo >= 6)
+            {
+                string[] scaryThoughts = new string[] { "¿Quién está detrás de mí?", "Ese no es mi reflejo...", "Mis ojos se ven... vacíos.", "Siento que me miran desde adentro." };
+                string thought = scaryThoughts[Random.Range(0, scaryThoughts.Length)];
+                AudioManager.Instance?.PlayWhisperAt(null);
+                GameManager.Instance.ApplyParanormalEvent(thought, 2, -1);
+            }
+            else
+            {
+                string[] thoughts = new string[] { "Solo soy yo...", "Tengo unas ojeras terribles.", "No quiero mirarme mucho tiempo." };
+                string thought = thoughts[Random.Range(0, thoughts.Length)];
+                UIManager.Instance?.ShowMessage(thought);
             }
         }
 

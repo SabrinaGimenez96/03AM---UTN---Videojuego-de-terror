@@ -60,6 +60,7 @@ namespace HorrorPrototype.Core
         private int doorEscapeClicks = 0;
         private float finalEventFearTimer = 0f;
         private bool lampBroken = false;
+        private bool isHallwayDeathSequenceActive = false;
 
         [Header("Feedback")]
         public CameraShake cameraShake;
@@ -100,9 +101,12 @@ namespace HorrorPrototype.Core
                 }
             }
 
-            if (miedo >= 10 || cordura <= 0)
+            if (!isHallwayDeathSequenceActive)
             {
-                LoseGame(miedo >= 10 ? "El panico paralizo tu corazon." : "Tu mente se quebro definitivamente.");
+                if (miedo >= 10 || cordura <= 0)
+                {
+                    LoseGame(miedo >= 10 ? "El panico paralizo tu corazon." : "Tu mente se quebro definitivamente.");
+                }
             }
         }
 
@@ -306,6 +310,21 @@ namespace HorrorPrototype.Core
 
         private string ResolveAction(ActionType action)
         {
+            if (action == ActionType.BathroomDoor)
+            {
+                if (Random.value < 0.5f)
+                {
+                    return "Que extraño, no puede abrirse, es como si tuviera el seguro puesto...";
+                }
+                else
+                {
+                    AudioManager.Instance?.PlayKnock();
+                    miedo = Mathf.Min(10, miedo + 2);
+                    cameraShake?.Shake(0.15f, 0.05f);
+                    return "¡POOM POOM! ¿Hay alguien ahí adentro...?";
+                }
+            }
+
             // Selecciona una tabla de reglas distinta segun el estado mental actual.
             switch (currentState)
             {
@@ -464,13 +483,36 @@ namespace HorrorPrototype.Core
                         return "Cierras la puerta desesperadamente.";
                     }
 
-                    cordura = 0;
-                    DoorEscapeController.Instance?.ShowOutcome(DoorEscapeOutcome.Crisis);
-                    LoseGame("Abriste la puerta cuando ya no podias confiar en tu mente.");
-                    return "La puerta se abre hacia algo que no puedes comprender.";
+                    StartHallwayDeathSequence();
+                    return "La oscuridad del pasillo te atrapa...";
                 default:
                     return string.Empty;
             }
+        }
+
+        private void StartHallwayDeathSequence()
+        {
+            isHallwayDeathSequenceActive = true;
+            FirstPersonController fpc = FindAnyObjectByType<FirstPersonController>();
+            if (fpc != null) fpc.LockCameraForward();
+
+            DoorEscapeController.Instance?.ShowDeathSequence();
+            UIManager.Instance?.ShowMessage("<color=red>No hay escapatoria...</color>");
+        }
+
+        public void DrainStatsForCinematic()
+        {
+            energia = Mathf.Max(0, energia - 1);
+            miedo = Mathf.Min(10, miedo + 1);
+            cordura = Mathf.Max(0, cordura - 1);
+            ClampStats();
+            UIManager.Instance?.UpdateStats();
+        }
+
+        public void EndHallwayDeathSequence()
+        {
+            isHallwayDeathSequenceActive = false;
+            LoseGame("La oscuridad del pasillo consumió tu mente.");
         }
 
         private string ResolveUnstableDoorAction()
@@ -539,6 +581,8 @@ namespace HorrorPrototype.Core
 
         private void CheckDefeat()
         {
+            if (isHallwayDeathSequenceActive) return;
+
             // Cada modificacion de stats revisa si miedo o cordura ya cruzaron el limite.
             if (miedo >= 10)
             {

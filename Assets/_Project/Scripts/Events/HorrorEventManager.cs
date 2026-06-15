@@ -17,7 +17,9 @@ namespace HorrorPrototype.Events
         // Golpes desde la puerta.
         DoorKnockEvent,
         // Vibracion o fallo del celular.
-        PhoneGlitchEvent
+        PhoneGlitchEvent,
+        // Television que se enciende sola
+        TVScaresEvent
     }
 
     // HorrorEventManager orquesta los sustos de la noche: eventos por temporizador,
@@ -56,6 +58,7 @@ namespace HorrorPrototype.Events
         [Range(0f, 1f)] public float lightFlickerEventChance = 0.18f;
         [Range(0f, 1f)] public float doorKnockEventChance = 0.2f;
         [Range(0f, 1f)] public float phoneGlitchEventChance = 0.16f;
+        [Range(0f, 1f)] public float tvScaresEventChance = 0.15f;
 
         [Header("Prefabs y puntos de escena")]
         // Referencias visuales, puntos de aparicion y emisores de audio espacial.
@@ -64,6 +67,7 @@ namespace HorrorPrototype.Events
         public Transform hallwayVisualPoint;
         public Transform doorTarget;
         public Transform phoneTarget;
+        public Transform tvTarget;
         public AudioSource doorAudioSource;
         public AudioSource phoneAudioSource;
         public Light lampLight;
@@ -175,8 +179,11 @@ namespace HorrorPrototype.Events
                 case HorrorEventType.DoorKnockEvent:
                     TriggerDoorKnockEvent();
                     break;
-                default:
+                case HorrorEventType.PhoneGlitchEvent:
                     TriggerPhoneGlitchEvent();
+                    break;
+                default:
+                    TriggerTVScaresEvent();
                     break;
             }
         }
@@ -184,14 +191,15 @@ namespace HorrorPrototype.Events
         private HorrorEventType PickWeightedEvent()
         {
             // Sorteo ponderado: cada chance ocupa un tramo del total acumulado.
-            float total = soundEventChance + shadowEventChance + lightFlickerEventChance + doorKnockEventChance + phoneGlitchEventChance;
+            float total = soundEventChance + shadowEventChance + lightFlickerEventChance + doorKnockEventChance + phoneGlitchEventChance + tvScaresEventChance;
             float roll = Random.Range(0f, Mathf.Max(total, 0.01f));
 
             if ((roll -= soundEventChance) <= 0f) return HorrorEventType.SoundEvent;
             if ((roll -= shadowEventChance) <= 0f) return HorrorEventType.ShadowEvent;
             if ((roll -= lightFlickerEventChance) <= 0f) return HorrorEventType.LightFlickerEvent;
             if ((roll -= doorKnockEventChance) <= 0f) return HorrorEventType.DoorKnockEvent;
-            return HorrorEventType.PhoneGlitchEvent;
+            if ((roll -= phoneGlitchEventChance) <= 0f) return HorrorEventType.PhoneGlitchEvent;
+            return HorrorEventType.TVScaresEvent;
         }
 
         private void TriggerSoundEvent()
@@ -252,6 +260,20 @@ namespace HorrorPrototype.Events
 
             phoneGlitchRoutine = StartCoroutine(VibratePhone());
             AudioManager.Instance?.PlayPhoneGlitchAt(phoneAudioSource);
+        }
+
+        private void TriggerTVScaresEvent()
+        {
+            GameManager.Instance.ApplyParanormalEvent("La televisión se encendió sola.", 2, -1);
+            if (tvTarget != null)
+            {
+                Light tvLight = tvTarget.GetComponentInChildren<Light>();
+                if (tvLight != null) tvLight.enabled = true;
+                
+                AudioSource tvAudio = tvTarget.GetComponentInChildren<AudioSource>();
+                if (tvAudio != null && !tvAudio.isPlaying) tvAudio.Play();
+            }
+            cameraShake?.Shake(0.6f, 0.08f);
         }
 
         private IEnumerator VibratePhone()

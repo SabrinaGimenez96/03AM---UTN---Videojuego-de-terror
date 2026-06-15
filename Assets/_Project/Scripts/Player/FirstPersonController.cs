@@ -127,6 +127,31 @@ namespace HorrorPrototype.Player
             baseYaw = transform.eulerAngles.y;
         }
 
+        public void DisableLookAndMovement()
+        {
+            // Bloquea por completo el movimiento y fija la camara (usado en secuencias de muerte).
+            allowMovement = false;
+            yawLimit = 0f;
+            minPitch = pitch;
+            maxPitch = pitch;
+        }
+
+        public void LockCameraForward()
+        {
+            // Fija la camara en la direccion actual, pero permite seguir caminando.
+            yawLimit = 0f;
+            baseYaw = transform.eulerAngles.y;
+            yaw = 0f;
+            minPitch = pitch;
+            maxPitch = pitch;
+        }
+
+        public bool IsLookingLeft()
+        {
+            // Si el yaw es negativo, esta mirando a la izquierda de su punto central (la puerta).
+            return yaw < -15f;
+        }
+
         private static void ToggleCursor()
         {
             bool shouldLock = Cursor.lockState != CursorLockMode.Locked;

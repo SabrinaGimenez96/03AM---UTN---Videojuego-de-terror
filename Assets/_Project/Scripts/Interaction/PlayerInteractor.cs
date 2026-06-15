@@ -33,11 +33,15 @@ namespace HorrorPrototype.Interaction
 
         public void InteractCurrent()
         {
-            // Si no se mira ningun objeto pero el jugador esta en cama, la barra lo levanta.
+            // Si no se mira ningun objeto pero el jugador esta en cama y mira a la izquierda, la barra lo levanta.
             if (currentInteractable == null && actionFeedback != null && actionFeedback.IsInBed)
             {
-                actionFeedback.StandUpFromBed();
-                UIManager.Instance?.HideContextAction();
+                FirstPersonController fpc = actionFeedback.GetComponent<FirstPersonController>();
+                if (fpc != null && fpc.IsLookingLeft())
+                {
+                    actionFeedback.StandUpFromBed();
+                    UIManager.Instance?.HideContextAction();
+                }
                 return;
             }
 
@@ -55,9 +59,12 @@ namespace HorrorPrototype.Interaction
 
                 if (ShouldStandUpFromBed(interacted))
                 {
-                    // Desde cama, la puerta o la cama primero levantan al jugador antes de otras reglas.
-                    actionFeedback.StandUpFromBed();
-                    UIManager.Instance?.HideContextAction();
+                    FirstPersonController fpc = actionFeedback.GetComponent<FirstPersonController>();
+                    if (fpc != null && fpc.IsLookingLeft())
+                    {
+                        actionFeedback.StandUpFromBed();
+                        UIManager.Instance?.HideContextAction();
+                    }
                     return;
                 }
 
@@ -97,15 +104,32 @@ namespace HorrorPrototype.Interaction
             if (currentInteractable != null)
             {
                 string displayName = GetDisplayName(currentInteractable);
-                UIManager.Instance?.ShowInteractionText(displayName);
-                UIManager.Instance?.ShowContextAction(displayName, currentInteractable.actionType, this);
+                if (string.IsNullOrEmpty(displayName))
+                {
+                    UIManager.Instance?.ShowInteractionText(string.Empty);
+                    UIManager.Instance?.HideContextAction();
+                }
+                else
+                {
+                    UIManager.Instance?.ShowInteractionText("[Espacio] " + displayName);
+                    UIManager.Instance?.ShowContextAction(displayName, currentInteractable.actionType, this);
+                }
             }
             else
             {
                 if (actionFeedback != null && actionFeedback.IsInBed)
                 {
-                    UIManager.Instance?.ShowInteractionText("Levantarse");
-                    UIManager.Instance?.ShowContextAction("Levantarse", ActionType.Ignore, this);
+                    FirstPersonController fpc = actionFeedback.GetComponent<FirstPersonController>();
+                    if (fpc != null && fpc.IsLookingLeft())
+                    {
+                        UIManager.Instance?.ShowInteractionText("[Espacio] Levantarse");
+                        UIManager.Instance?.ShowContextAction("Levantarse", ActionType.Ignore, this);
+                    }
+                    else
+                    {
+                        UIManager.Instance?.ShowInteractionText(string.Empty);
+                        UIManager.Instance?.HideContextAction();
+                    }
                 }
                 else
                 {
@@ -125,7 +149,12 @@ namespace HorrorPrototype.Interaction
 
             if (ShouldStandUpFromBed(interactable))
             {
-                return "Levantarse";
+                FirstPersonController fpc = actionFeedback.GetComponent<FirstPersonController>();
+                if (fpc != null && fpc.IsLookingLeft())
+                {
+                    return "Levantarse";
+                }
+                return string.Empty;
             }
 
             if (interactable.actionType == ActionType.Phone)
@@ -136,6 +165,11 @@ namespace HorrorPrototype.Interaction
             if (interactable.actionType == ActionType.Lamp && actionFeedback != null)
             {
                 return actionFeedback.LampIsOn ? "Apagar lámpara" : "Encender lámpara";
+            }
+
+            if (interactable.actionType == ActionType.TV && actionFeedback != null)
+            {
+                return actionFeedback.TvIsOn ? "Apagar TV" : "Encender TV";
             }
 
             if (interactable.actionType == ActionType.Door)

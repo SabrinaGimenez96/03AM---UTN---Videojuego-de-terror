@@ -9,6 +9,18 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 363264237667080991, guid: 6a57508ea9f1a2e4ba69675cdd7361e3, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 363264237667080991, guid: 6a57508ea9f1a2e4ba69675cdd7361e3, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 363264237667080991, guid: 6a57508ea9f1a2e4ba69675cdd7361e3, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 363264237667080991, guid: 6a57508ea9f1a2e4ba69675cdd7361e3, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
       objectReference: {fileID: 0}
@@ -48,14 +60,18 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 363264237667080991, guid: 6a57508ea9f1a2e4ba69675cdd7361e3, type: 3}
+      propertyPath: m_ConstrainProportionsScale
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 681558319412702924, guid: 6a57508ea9f1a2e4ba69675cdd7361e3, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: a3be48c87cbbac54296d95cbdfd1b8c2, type: 2}
+      objectReference: {fileID: 2100000, guid: 0a2d6be6fcc4b5c49bdbb2e1f10f9bfe, type: 2}
     - target: {fileID: 812553003524583414, guid: 6a57508ea9f1a2e4ba69675cdd7361e3, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: a3be48c87cbbac54296d95cbdfd1b8c2, type: 2}
+      objectReference: {fileID: 2100000, guid: 0a2d6be6fcc4b5c49bdbb2e1f10f9bfe, type: 2}
     - target: {fileID: 1027175079354532261, guid: 6a57508ea9f1a2e4ba69675cdd7361e3, type: 3}
       propertyPath: m_Name
       value: ZombieSombra_Listo
@@ -63,27 +79,27 @@ PrefabInstance:
     - target: {fileID: 1348612578185417354, guid: 6a57508ea9f1a2e4ba69675cdd7361e3, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: a3be48c87cbbac54296d95cbdfd1b8c2, type: 2}
+      objectReference: {fileID: 2100000, guid: 0a2d6be6fcc4b5c49bdbb2e1f10f9bfe, type: 2}
     - target: {fileID: 2147571100911051869, guid: 6a57508ea9f1a2e4ba69675cdd7361e3, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: a3be48c87cbbac54296d95cbdfd1b8c2, type: 2}
+      objectReference: {fileID: 2100000, guid: 0a2d6be6fcc4b5c49bdbb2e1f10f9bfe, type: 2}
     - target: {fileID: 5460493292086466763, guid: 6a57508ea9f1a2e4ba69675cdd7361e3, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: a3be48c87cbbac54296d95cbdfd1b8c2, type: 2}
+      objectReference: {fileID: 2100000, guid: 0a2d6be6fcc4b5c49bdbb2e1f10f9bfe, type: 2}
     - target: {fileID: 6866617128736291975, guid: 6a57508ea9f1a2e4ba69675cdd7361e3, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: a3be48c87cbbac54296d95cbdfd1b8c2, type: 2}
+      objectReference: {fileID: 2100000, guid: 0a2d6be6fcc4b5c49bdbb2e1f10f9bfe, type: 2}
     - target: {fileID: 7271144555557408967, guid: 6a57508ea9f1a2e4ba69675cdd7361e3, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: a3be48c87cbbac54296d95cbdfd1b8c2, type: 2}
+      objectReference: {fileID: 2100000, guid: 0a2d6be6fcc4b5c49bdbb2e1f10f9bfe, type: 2}
     - target: {fileID: 9037096139816757062, guid: 6a57508ea9f1a2e4ba69675cdd7361e3, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: a3be48c87cbbac54296d95cbdfd1b8c2, type: 2}
+      objectReference: {fileID: 2100000, guid: 0a2d6be6fcc4b5c49bdbb2e1f10f9bfe, type: 2}
     m_RemovedComponents:
     - {fileID: 9037096139816757063, guid: 6a57508ea9f1a2e4ba69675cdd7361e3, type: 3}
     m_RemovedGameObjects: []

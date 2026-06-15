@@ -11,7 +11,13 @@ namespace HorrorPrototype.Interaction
         // Lampara: ilumina, puede parpadear con miedo alto y modifica avistamientos.
         Lamp,
         // Puerta: via de escape de ultimo recurso con resultado segun estado mental.
-        Door
+        Door,
+        // Television: se enciende con estatica, puede asustar.
+        TV,
+        // Espejo: al interactuar genera un pensamiento narrativo de duda.
+        Mirror,
+        // Puerta del baño al final del pasillo
+        BathroomDoor
     }
 
     // InteractableObject etiqueta cualquier objeto o collider auxiliar con una accion de gameplay.
