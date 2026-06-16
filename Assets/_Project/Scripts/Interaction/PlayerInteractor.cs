@@ -111,7 +111,7 @@ namespace HorrorPrototype.Interaction
                 }
                 else
                 {
-                    UIManager.Instance?.ShowInteractionText("[Espacio] " + displayName);
+                    UIManager.Instance?.ShowInteractionText(displayName);
                     UIManager.Instance?.ShowContextAction(displayName, currentInteractable.actionType, this);
                 }
             }
@@ -122,7 +122,7 @@ namespace HorrorPrototype.Interaction
                     FirstPersonController fpc = actionFeedback.GetComponent<FirstPersonController>();
                     if (fpc != null && fpc.IsLookingLeft())
                     {
-                        UIManager.Instance?.ShowInteractionText("[Espacio] Levantarse");
+                        UIManager.Instance?.ShowInteractionText("Levantarse");
                         UIManager.Instance?.ShowContextAction("Levantarse", ActionType.Ignore, this);
                     }
                     else

@@ -72,16 +72,49 @@ namespace HorrorPrototype.UI
             }
         }
 
+        private void Start()
+        {
+            if (controlsText != null)
+            {
+                Invoke(nameof(FadeOutControlsText), 8f);
+                Invoke(nameof(HideControlsTextDelayed), 10f);
+            }
+        }
+
+        private void FadeOutControlsText()
+        {
+            if (controlsText != null)
+            {
+                controlsText.CrossFadeAlpha(0f, 2f, false);
+            }
+        }
+
+        private void HideControlsTextDelayed()
+        {
+            if (controlsText != null)
+            {
+                controlsText.gameObject.SetActive(false);
+            }
+        }
+
         public void UpdateStats()
         {
-            // Refresca energia, miedo, cordura y estado mental en pantalla.
+            // Ocultamos los numeros de energia, miedo y cordura para mayor inmersión.
+            // Solo mostramos el estado mental actual con colores dinámicos.
             if (statsText == null || GameManager.Instance == null)
             {
                 return;
             }
 
             GameManager game = GameManager.Instance;
-            statsText.text = $"Energia: {game.energia}\nMiedo: {game.miedo}\nCordura: {game.cordura}\nEstado: {game.currentState}";
+            string stateColor = "#FFFFFF"; // Blanco por defecto (Calma)
+            
+            if (game.currentState == MentalState.Inestable)
+                stateColor = "#FFA500"; // Naranja
+            else if (game.currentState == MentalState.Crisis)
+                stateColor = "#FF0000"; // Rojo
+                
+            statsText.text = $"<color=white>Estado Mental:</color> <b><color={stateColor}>{game.currentState}</color></b>";
         }
 
         // El texto de objeto apuntado se alimenta desde el Raycast del jugador.
