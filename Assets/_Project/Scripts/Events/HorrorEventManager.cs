@@ -222,7 +222,10 @@ namespace HorrorPrototype.Events
             int sanityDelta = lampIsOn ? -1 : 0;
 
             GameManager.Instance.ApplyParanormalEvent(message, fearDelta, sanityDelta);
-            SpawnAt(shadowFigurePrefab, PickShadowPoint(), 2.5f);
+            
+            // Le damos más tiempo de vida (5s) para que el NavMeshAgent tenga tiempo de caminar hacia el jugador.
+            SpawnAt(shadowFigurePrefab, PickShadowPoint(), 5.0f);
+            
             cameraShake?.Shake(0.42f, 0.055f);
             AudioManager.Instance?.PlayScareStinger();
         }
@@ -267,8 +270,12 @@ namespace HorrorPrototype.Events
             GameManager.Instance.ApplyParanormalEvent("La televisión se encendió sola.", 2, -1);
             if (tvTarget != null)
             {
-                Light tvLight = tvTarget.GetComponentInChildren<Light>();
-                if (tvLight != null) tvLight.enabled = true;
+                Light tvLight = tvTarget.GetComponentInChildren<Light>(true);
+                if (tvLight != null)
+                {
+                    tvLight.gameObject.SetActive(true);
+                    tvLight.enabled = true;
+                }
                 
                 AudioSource tvAudio = tvTarget.GetComponentInChildren<AudioSource>();
                 if (tvAudio != null && !tvAudio.isPlaying) tvAudio.Play();

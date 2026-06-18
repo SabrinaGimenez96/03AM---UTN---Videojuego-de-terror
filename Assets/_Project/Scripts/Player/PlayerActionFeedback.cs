@@ -274,6 +274,13 @@ namespace HorrorPrototype.Player
                 lampLight.enabled = lampIsOn;
             }
 
+            ParticleSystem lampParticles = target.GetComponentInChildren<ParticleSystem>();
+            if (lampParticles != null)
+            {
+                if (lampIsOn) lampParticles.Play();
+                else lampParticles.Stop();
+            }
+
             GameManager.Instance?.SetLampState(lampIsOn);
 
             if (lampIsOn && GameManager.Instance != null && GameManager.Instance.miedo >= 5)
