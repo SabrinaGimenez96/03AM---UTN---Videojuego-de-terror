@@ -16,7 +16,11 @@ namespace HorrorPrototype.UI
         {
             if (GameManager.Instance != null && GameManager.Instance.GameEnded && WasRestartPressed())
             {
-                RestartCurrentScene();
+                // Solo permitimos reiniciar si la pantalla final ya apareció (evita reiniciar accidentalmente durante la cinemática)
+                if (UIManager.Instance != null && UIManager.Instance.endPanel != null && UIManager.Instance.endPanel.activeSelf)
+                {
+                    RestartCurrentScene();
+                }
             }
         }
 

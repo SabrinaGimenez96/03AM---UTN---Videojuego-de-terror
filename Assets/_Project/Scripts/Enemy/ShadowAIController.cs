@@ -72,7 +72,7 @@ namespace HorrorPrototype.Enemy
             if (GameManager.Instance != null)
             {
                 // Penalización severa por dejar que la sombra te alcance
-                GameManager.Instance.ApplyParanormalEvent("¡La sombra te ha alcanzado!", 3, -1);
+                GameManager.Instance.ApplyParanormalEvent("¡¿Q-Qué es eso?!", 3, -1);
             }
             
             AudioManager.Instance?.PlayScareStinger();

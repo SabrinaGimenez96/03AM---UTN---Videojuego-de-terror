@@ -162,6 +162,12 @@ namespace HorrorPrototype.Events
 
         private void TriggerRandomEvent()
         {
+            // Si la luz está encendida, es una zona segura. No hay sustos ni ruidos.
+            if (GameManager.Instance != null && GameManager.Instance.LampIsOn)
+            {
+                return;
+            }
+
             // Elige un evento por peso y llama el metodo que aplica stats, audio y visual.
             HorrorEventType eventType = PickWeightedEvent();
 
@@ -216,8 +222,8 @@ namespace HorrorPrototype.Events
             // Si la lampara esta encendida, ver al fantasma completo castiga mas fuerte.
             bool lampIsOn = GameManager.Instance != null && GameManager.Instance.LampIsOn;
             string message = lampIsOn
-                ? "La lampara revela una figura completa en la esquina."
-                : "Una sombra cruza por la esquina de la habitacion.";
+                ? "La luz revela una aberración con demasiadas patas arrastrándose."
+                : "Algo grande y deforme se arrastra por el suelo en la oscuridad.";
             int fearDelta = lampIsOn ? 3 : 1;
             int sanityDelta = lampIsOn ? -1 : 0;
 

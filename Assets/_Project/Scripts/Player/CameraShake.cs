@@ -42,6 +42,16 @@ namespace HorrorPrototype.Player
             shakeRoutine = StartCoroutine(ShakeRoutine(duration, intensity));
         }
 
+        public void StopShake()
+        {
+            if (shakeRoutine != null)
+            {
+                StopCoroutine(shakeRoutine);
+                shakeRoutine = null;
+            }
+            transform.localPosition = baseLocalPosition;
+        }
+
         private IEnumerator ShakeRoutine(float duration, float intensity)
         {
             // Genera offsets aleatorios pequenos cada frame y restaura al finalizar.

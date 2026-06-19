@@ -49,11 +49,12 @@ namespace HorrorPrototype.Core
 
         [Header("Estadisticas y Bateria")]
         public float lampBattery = 100f;
-        public float lampDrainRate = 1.5f;
+        public float lampDrainRate = 4.0f;
         [Header("Estadisticas Ocultas")]
         public int vecesPuertaAbierta = 0;
         public int sustosEvitados = 0;
         public int vecesLuzEncendida = 0;
+        private int phoneUses = 0;
 
         [Header("Evento Final")]
         public bool isFinalEventActive = false;
@@ -139,7 +140,7 @@ namespace HorrorPrototype.Core
             ClampStats();
             UpdateMentalState();
             UIManager.Instance?.UpdateStats();
-            UIManager.Instance?.ShowMessage("La habitacion esta en silencio. La noche apenas empieza.");
+            UIManager.Instance?.ShowMessage("03:00 AM. Otra vez ese ruido. Siento que no estoy sola en la habitación...");
         }
 
         public void TriggerFinalEvent()
@@ -262,9 +263,42 @@ namespace HorrorPrototype.Core
             }
 
             GameEnded = true;
-            UIManager.Instance?.ShowEndScreen(EndResult.Victoria, "Lograste sobrevivir hasta el amanecer.");
+            StartCoroutine(WinSequence());
+        }
+
+        private System.Collections.IEnumerator WinSequence()
+        {
+            // Bloqueamos la camara parando el tiempo, pero la corrutina seguira en tiempo real
             UnlockCursor();
             Time.timeScale = 0f;
+            
+            // Frenamos cualquier temblor residual de la camara
+            cameraShake?.StopShake();
+
+            // Iniciamos el fade out de todos los sonidos de tension
+            if (AudioManager.Instance != null)
+            {
+                AudioManager.Instance.FadeOutAllAudio(3.5f);
+            }
+
+            // Mostramos el texto narrativo final
+            UIManager.Instance?.ShowMessage("06:00 AM. La noche por fin ha terminado... El sol empieza a salir.");
+
+            // Iluminamos el cuarto de a poco (Amanecer) usando el tiempo real
+            float fadeTime = 0f;
+            float fadeDuration = 7.0f; // 7 segundos de amanecer
+            Color initialAmbient = RenderSettings.ambientLight;
+            Color morningAmbient = new Color(0.45f, 0.5f, 0.6f); // Gris azulado de madrugada
+
+            while (fadeTime < fadeDuration)
+            {
+                fadeTime += Time.unscaledDeltaTime;
+                RenderSettings.ambientLight = Color.Lerp(initialAmbient, morningAmbient, fadeTime / fadeDuration);
+                yield return null;
+            }
+
+            // Mostramos la pantalla final oficial
+            UIManager.Instance?.ShowEndScreen(EndResult.Victoria, "Lograste sobrevivir hasta el amanecer.");
         }
 
         // El final neutral mantiene la partida entregable sin tratar la inestabilidad como exito pleno.
@@ -310,6 +344,21 @@ namespace HorrorPrototype.Core
 
         private string ResolveAction(ActionType action)
         {
+            // Control de abuso del celular
+            if (action == ActionType.Phone)
+            {
+                phoneUses++;
+                if (phoneUses > 3)
+                {
+                    // Si el jugador abusa del celular para calmarse, recibe un susto severo
+                    miedo = Mathf.Min(10, miedo + 3);
+                    cordura = Mathf.Max(0, cordura - 1);
+                    AudioManager.Instance?.PlayScareStinger();
+                    cameraShake?.Shake(0.3f, 0.05f);
+                    return "Abres la galería... pero hay una foto tuya... durmiendo... tomada desde el techo.";
+                }
+            }
+
             if (action == ActionType.BathroomDoor)
             {
                 if (Random.value < 0.5f)
@@ -558,8 +607,17 @@ namespace HorrorPrototype.Core
 
         public void SetLampState(bool isOn)
         {
-            // Sincroniza el estado visual de la lampara con la logica de eventos.
             LampIsOn = isOn;
+            
+            // Si la luz se enciende, destruimos automáticamente cualquier monstruo/araña que esté en la escena
+            if (isOn)
+            {
+                var arañas = FindObjectsByType<Enemy.ShadowAIController>(FindObjectsInactive.Exclude);
+                foreach (var araña in arañas)
+                {
+                    Destroy(araña.gameObject);
+                }
+            }
         }
 
         public void ApplyLampPanic()

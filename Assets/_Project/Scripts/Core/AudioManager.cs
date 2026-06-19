@@ -119,6 +119,32 @@ namespace HorrorPrototype.Core
             PlayOneShot(scareStinger);
         }
 
+        public void FadeOutAllAudio(float duration)
+        {
+            if (ambientSource != null) StartCoroutine(FadeOutRoutine(ambientSource, duration));
+            if (heartbeatSource != null) StartCoroutine(FadeOutRoutine(heartbeatSource, duration));
+            if (oneShotSource != null) StartCoroutine(FadeOutRoutine(oneShotSource, duration));
+        }
+
+        private System.Collections.IEnumerator FadeOutRoutine(AudioSource source, float duration)
+        {
+            if (source == null || !source.isPlaying) yield break;
+
+            float startVolume = source.volume;
+            float time = 0;
+
+            while (time < duration)
+            {
+                // Usamos unscaledDeltaTime por si el juego está en pausa (Time.timeScale = 0)
+                time += Time.unscaledDeltaTime;
+                source.volume = Mathf.Lerp(startVolume, 0f, time / duration);
+                yield return null;
+            }
+
+            source.volume = 0f;
+            source.Stop();
+        }
+
         private void ConfigureSources()
         {
             // Autocompleta AudioSources para que el manager funcione aunque el prefab este incompleto.
