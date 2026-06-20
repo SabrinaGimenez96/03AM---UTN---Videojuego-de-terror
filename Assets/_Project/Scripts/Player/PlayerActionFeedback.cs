@@ -260,6 +260,11 @@ namespace HorrorPrototype.Player
 
         private void ToggleLamp(InteractableObject lampInteractable)
         {
+            if (GameManager.Instance != null && GameManager.Instance.lampBroken)
+            {
+                return;
+            }
+
             // El velador puede activarse por su collider directo o via mesa usando feedbackTarget.
             Transform target = GetFeedbackTarget(lampInteractable);
             Light lampLight = target.GetComponentInChildren<Light>();

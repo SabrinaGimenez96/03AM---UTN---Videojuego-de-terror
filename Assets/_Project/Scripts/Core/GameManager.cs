@@ -58,10 +58,14 @@ namespace HorrorPrototype.Core
 
         [Header("Evento Final")]
         public bool isFinalEventActive = false;
+        private bool isHallwayDeathSequenceActive = false;
         private int doorEscapeClicks = 0;
         private float finalEventFearTimer = 0f;
-        private bool lampBroken = false;
-        private bool isHallwayDeathSequenceActive = false;
+        public bool lampBroken = false;
+        public bool isHallwaySafe = false;
+        
+        private Coroutine safeHallwayRoutine;
+        public Light[] hallwayLights; // Referencias a las luces físicas del pasillo
 
         [Header("Feedback")]
         public CameraShake cameraShake;
@@ -96,6 +100,17 @@ namespace HorrorPrototype.Core
             if (LampIsOn)
             {
                 lampBattery -= lampDrainRate * Time.deltaTime;
+                
+                // Aviso de batería baja (titileo errático)
+                if (lampBattery <= 20f && !lampBroken)
+                {
+                    if (HorrorEventManager.Instance != null && HorrorEventManager.Instance.lampLight != null)
+                    {
+                        // 15% de probabilidad por frame de que la luz se corte temporalmente
+                        HorrorEventManager.Instance.lampLight.enabled = Random.value > 0.15f;
+                    }
+                }
+
                 if (lampBattery <= 0f && !lampBroken)
                 {
                     BreakLamp();
@@ -140,7 +155,7 @@ namespace HorrorPrototype.Core
             ClampStats();
             UpdateMentalState();
             UIManager.Instance?.UpdateStats();
-            UIManager.Instance?.ShowMessage("03:00 AM. Otra vez ese ruido. Siento que no estoy sola en la habitación...");
+            UIManager.Instance?.ShowMessage("03:00 AM. Otra vez ese ruido. Siento que no estoy solo en la habitación...");
         }
 
         public void TriggerFinalEvent()
@@ -363,7 +378,9 @@ namespace HorrorPrototype.Core
             {
                 if (Random.value < 0.5f)
                 {
-                    return "Que extraño, no puede abrirse, es como si tuviera el seguro puesto...";
+                    cordura = Mathf.Min(10, cordura + 2);
+                    miedo = Mathf.Max(0, miedo - 1);
+                    return "El pasillo está en calma. Saber que tu casa sigue ahí afuera te tranquiliza un poco.";
                 }
                 else
                 {
@@ -406,13 +423,24 @@ namespace HorrorPrototype.Core
                     if (DoorEscapeController.Instance != null && DoorEscapeController.Instance.IsOpen)
                     {
                         DoorEscapeController.Instance.CloseDoor();
+                        if (safeHallwayRoutine != null) { StopCoroutine(safeHallwayRoutine); safeHallwayRoutine = null; }
+                        if (hallwayLights != null)
+                        {
+                            foreach (Light l in hallwayLights)
+                            {
+                                if (l != null) l.enabled = false;
+                            }
+                        }
+                        isHallwaySafe = false;
                         return "Cierras la puerta. El pasillo queda del otro lado.";
                     }
 
                     energia -= 1;
-                    cordura -= 1;
-                    DoorEscapeController.Instance?.ShowOutcome(DoorEscapeOutcome.CalmWarning);
-                    return "Te acercas a la puerta. El pasillo parece demasiado largo.";
+                    cordura += 1;
+                    DoorEscapeController.Instance?.ShowOutcome(DoorEscapeOutcome.SafeHallway);
+                    if (safeHallwayRoutine != null) StopCoroutine(safeHallwayRoutine);
+                    safeHallwayRoutine = StartCoroutine(SafeHallwayRoutine());
+                    return "El pasillo está iluminado. Escuchar el silencio afuera te tranquiliza un poco.";
                 default:
                     return string.Empty;
             }
@@ -570,6 +598,15 @@ namespace HorrorPrototype.Core
             if (DoorEscapeController.Instance != null && DoorEscapeController.Instance.IsOpen)
             {
                 DoorEscapeController.Instance.CloseDoor();
+                if (safeHallwayRoutine != null) { StopCoroutine(safeHallwayRoutine); safeHallwayRoutine = null; }
+                if (hallwayLights != null)
+                {
+                    foreach (Light l in hallwayLights)
+                    {
+                        if (l != null) l.enabled = false;
+                    }
+                }
+                isHallwaySafe = false;
                 return "Cierras la puerta. El pasillo queda del otro lado.";
             }
 
@@ -580,6 +617,8 @@ namespace HorrorPrototype.Core
                 miedo -= 3;
                 cordura += 2;
                 DoorEscapeController.Instance?.ShowOutcome(DoorEscapeOutcome.SafeHallway);
+                if (safeHallwayRoutine != null) StopCoroutine(safeHallwayRoutine);
+                safeHallwayRoutine = StartCoroutine(SafeHallwayRoutine());
                 return "Abres la puerta. La luz del pasillo corta los sonidos y vuelves a respirar.";
             }
 
@@ -588,6 +627,69 @@ namespace HorrorPrototype.Core
             DoorEscapeController.Instance?.ShowOutcome(DoorEscapeOutcome.DarkHallway);
             HorrorEventManager.Instance?.TriggerHallwayDoorEvent();
             return "Abres la puerta. El pasillo esta negro y los sonidos golpean mas fuerte.";
+        }
+
+        private System.Collections.IEnumerator SafeHallwayRoutine()
+        {
+            isHallwaySafe = true;
+
+            // Apagamos audios de tensión
+            if (AudioManager.Instance != null) AudioManager.Instance.FadeOutAllAudio(1.0f);
+            
+            // Creamos luz en el pasillo encendiendo las luces físicas
+            if (hallwayLights != null)
+            {
+                foreach (Light l in hallwayLights)
+                {
+                    if (l != null) l.enabled = true;
+                }
+            }
+
+            // Esperamos 10 segundos
+            yield return new WaitForSeconds(10.0f);
+
+            // Se acabó la paz
+            if (DoorEscapeController.Instance != null && DoorEscapeController.Instance.IsOpen)
+            {
+                // Apagamos las luces físicas
+                if (hallwayLights != null)
+                {
+                    foreach (Light l in hallwayLights)
+                    {
+                        if (l != null) l.enabled = false;
+                    }
+                }
+                AudioManager.Instance?.PlayScareStinger();
+                DoorEscapeController.Instance.CloseDoor();
+                isHallwaySafe = false;
+                
+                // Comprobamos si el jugador está afuera (acampar) comparando distancias
+                Player.FirstPersonController fpc = FindAnyObjectByType<Player.FirstPersonController>();
+                bool trappedOutside = false;
+                if (fpc != null && HorrorEventManager.Instance != null)
+                {
+                    float distToHallway = Vector3.Distance(fpc.transform.position, HorrorEventManager.Instance.hallwayVisualPoint.position);
+                    Player.PlayerActionFeedback feedback = fpc.GetComponent<Player.PlayerActionFeedback>();
+                    float distToBed = Vector3.Distance(fpc.transform.position, feedback != null ? feedback.bedPosition : Vector3.zero);
+                    
+                    if (distToHallway < distToBed)
+                    {
+                        trappedOutside = true;
+                    }
+                }
+                
+                // Damos 1.5s para que la animación de la puerta y el susto se procesen antes de aplicar el castigo
+                yield return new WaitForSeconds(1.5f);
+
+                if (trappedOutside)
+                {
+                    LoseGame("La puerta se cerró a tus espaldas... Estás atrapado en la oscuridad.");
+                }
+                else
+                {
+                    ApplyStress(4, -2, "La bombilla estalló y la puerta se cerró. El pasillo ya no es seguro.");
+                }
+            }
         }
 
         // Eliminado CloseDoorIfAlreadyOpen, resuelto inline.

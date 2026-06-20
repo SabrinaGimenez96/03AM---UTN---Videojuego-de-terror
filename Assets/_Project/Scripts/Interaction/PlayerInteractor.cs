@@ -164,6 +164,10 @@ namespace HorrorPrototype.Interaction
 
             if (interactable.actionType == ActionType.Lamp && actionFeedback != null)
             {
+                if (GameManager.Instance != null && GameManager.Instance.lampBroken)
+                {
+                    return string.Empty;
+                }
                 return actionFeedback.LampIsOn ? "Apagar lámpara" : "Encender lámpara";
             }
 

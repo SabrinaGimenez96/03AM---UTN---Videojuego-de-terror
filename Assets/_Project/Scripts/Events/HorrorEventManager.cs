@@ -58,7 +58,7 @@ namespace HorrorPrototype.Events
         [Range(0f, 1f)] public float lightFlickerEventChance = 0.18f;
         [Range(0f, 1f)] public float doorKnockEventChance = 0.2f;
         [Range(0f, 1f)] public float phoneGlitchEventChance = 0.16f;
-        [Range(0f, 1f)] public float tvScaresEventChance = 0.15f;
+        [Range(0f, 1f)] public float tvScaresEventChance = 0.45f;
 
         [Header("Prefabs y puntos de escena")]
         // Referencias visuales, puntos de aparicion y emisores de audio espacial.
@@ -111,8 +111,8 @@ namespace HorrorPrototype.Events
 
         private void Update()
         {
-            // Detiene sustos cuando no hay GameManager o la partida ya termino.
-            if (GameManager.Instance == null || GameManager.Instance.GameEnded)
+            // Detiene sustos cuando no hay GameManager, la partida ya termino, o estamos en paz temporal en el pasillo.
+            if (GameManager.Instance == null || GameManager.Instance.GameEnded || GameManager.Instance.isHallwaySafe)
             {
                 return;
             }
@@ -154,9 +154,18 @@ namespace HorrorPrototype.Events
 
         public void TriggerHallwayDoorEvent()
         {
-            // La puerta inestable muestra una figura rapida sin sumar doble castigo estadistico.
-            SpawnAt(shadowFigurePrefab, hallwayVisualPoint, 2.4f);
-            UIManager.Instance?.ShowMessage("Algo se desliza fuera de tu vista en el pasillo.");
+            // Instancia la figura en el pasillo pero apaga su IA para que solo te observe fijamente
+            GameObject figure = SpawnAt(shadowFigurePrefab, hallwayVisualPoint, 4.0f);
+            if (figure != null)
+            {
+                var ai = figure.GetComponent<Enemy.ShadowAIController>();
+                if (ai != null) ai.enabled = false;
+                
+                var anim = figure.GetComponentInChildren<Animator>();
+                if (anim != null) anim.speed = 0;
+            }
+
+            UIManager.Instance?.ShowMessage("Algo te observa desde el fondo del pasillo...");
             cameraShake?.Shake(0.35f, 0.045f);
         }
 

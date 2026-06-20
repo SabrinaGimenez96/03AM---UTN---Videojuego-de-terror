@@ -14,14 +14,7 @@ namespace HorrorPrototype.UI
     {
         private void Update()
         {
-            if (GameManager.Instance != null && GameManager.Instance.GameEnded && WasRestartPressed())
-            {
-                // Solo permitimos reiniciar si la pantalla final ya apareció (evita reiniciar accidentalmente durante la cinemática)
-                if (UIManager.Instance != null && UIManager.Instance.endPanel != null && UIManager.Instance.endPanel.activeSelf)
-                {
-                    RestartCurrentScene();
-                }
-            }
+            // El usuario solicitó remover el reinicio con barra espaciadora, ahora solo se reinicia mediante los botones de la UI.
         }
 
         public void RestartCurrentScene()
