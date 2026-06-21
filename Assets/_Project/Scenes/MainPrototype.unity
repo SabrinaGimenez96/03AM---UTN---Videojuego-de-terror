@@ -1984,7 +1984,7 @@ Transform:
   m_GameObject: {fileID: 547690334}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.1, z: 0.1}
+  m_LocalPosition: {x: 0, y: 0.1, z: 0.28190804}
   m_LocalScale: {x: 0.770192, y: 0.770192, z: 0.82864803}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2030,8 +2030,8 @@ Light:
   serializedVersion: 13
   m_Type: 2
   m_Color: {r: 0.9339623, g: 0.769438, b: 0.47138664, a: 1}
-  m_Intensity: 1
-  m_Range: 0.89
+  m_Intensity: 2
+  m_Range: 2
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
   m_CookieSize2D: {x: 0.5, y: 0.5}
@@ -2069,7 +2069,7 @@ Light:
     serializedVersion: 2
     m_Bits: 4294967295
   m_RenderingLayerMask: 1
-  m_Lightmapping: 4
+  m_Lightmapping: 2
   m_LightShadowCasterMode: 0
   m_AreaSize: {x: 1, y: 1}
   m_BounceIntensity: 1
@@ -2464,7 +2464,7 @@ Transform:
   m_GameObject: {fileID: 850204227}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.1, z: 0.1}
+  m_LocalPosition: {x: 0, y: 0.1, z: 0.28190804}
   m_LocalScale: {x: 0.77019, y: 0.77019, z: 0.8286474}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2510,8 +2510,8 @@ Light:
   serializedVersion: 13
   m_Type: 2
   m_Color: {r: 0.9339623, g: 0.769438, b: 0.47138664, a: 1}
-  m_Intensity: 1
-  m_Range: 0.89
+  m_Intensity: 2
+  m_Range: 2
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
   m_CookieSize2D: {x: 0.5, y: 0.5}
@@ -4226,11 +4226,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: d5e1d5fa0238c1649b9005287553720f, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 3.5275
+      value: 2.8
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: d5e1d5fa0238c1649b9005287553720f, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -0.17006016
+      value: -0.8
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: d5e1d5fa0238c1649b9005287553720f, type: 3}
       propertyPath: m_LocalRotation.w
@@ -5340,12 +5340,17 @@ MonoBehaviour:
   miedo: 0
   cordura: 5
   currentState: 0
-  lampBattery: 25
+  lampBattery: 100
   lampDrainRate: 1.5
   vecesPuertaAbierta: 0
   sustosEvitados: 0
   vecesLuzEncendida: 0
   isFinalEventActive: 0
+  lampBroken: 0
+  isHallwaySafe: 0
+  hallwayLights:
+  - {fileID: 850204230}
+  - {fileID: 547690337}
   cameraShake: {fileID: 542503746}
 --- !u!4 &1810419168
 Transform:
@@ -6018,11 +6023,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: d5e1d5fa0238c1649b9005287553720f, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 3.5275
+      value: 2.8
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: d5e1d5fa0238c1649b9005287553720f, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -0.17006016
+      value: -0.8
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: d5e1d5fa0238c1649b9005287553720f, type: 3}
       propertyPath: m_LocalRotation.w
