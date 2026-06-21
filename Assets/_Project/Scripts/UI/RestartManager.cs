@@ -25,6 +25,13 @@ namespace HorrorPrototype.UI
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
 
+        public void LoadMainMenu()
+        {
+            Time.timeScale = 1f;
+            // Usamos el buildIndex 0 asumiendo que el Menú Principal es siempre la primera escena
+            SceneManager.LoadScene(0); 
+        }
+
         private static bool WasRestartPressed()
         {
             // Lee barra espaciadora con Input System o Input Manager clasico.
